@@ -20,6 +20,7 @@ Parameters for throttle and steering PID Controllers.
 
 `D`: the added proportional part can stabilize the oscillation resulting from the `P` controller. So theoretically using `PD` controller, the car can move back to the required path.
 
+`I`: when the system bias exists, it needs to add the  `I` controller so as to implement a `PID` controller to stable the moveing car.
 ---
 
 ## Dependencies
