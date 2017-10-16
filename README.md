@@ -1,6 +1,25 @@
 # CarND-Controls-PID
 Self-Driving Car Engineer Nanodegree Program
 
+## Description
+
+ According to the udacity course, I use Twiddle to turn the best PID parameters and test in the Udacity Simulator. Since the PID parameters can not adapt itself when the velocity changes, it's necessary to control the throttle input as well.
+
+## Video : [Udacity-PID](https://youtu.be/qRhzgPU5XmY)
+
+
+## Parameter
+Parameters for throttle and steering PID Controllers. 
+`cte` the distance bias between the car and the reference lines. 
+`p_error` the error for the proportional part, same as the distance bias 
+`d_error` the error between the current distance bias and the prefore for differential part, 
+`i_error` the accumulated error of distance bias for integration part
+### Steering (PID)
+
+`P`: we steer the car proportionally to its offset from the center of  desired path, but it will result in a overshoot just using a proportional controller.
+
+`D`: the added proportional part can stabilize the oscillation resulting from the `P` controller. So theoretically using `PD` controller, the car can move back to the required path.
+
 ---
 
 ## Dependencies
