@@ -119,15 +119,15 @@ int main()
   PID pid_;
  // TODO: Initialize the pid variable.
   
-  const double Kp_s = 0.055;
-  const double Ki_s = 0.0024;
-  const double Kd_s = 1.26;
+  const double Kp_s = 0.15;
+  const double Ki_s = 0.00001;
+  const double Kd_s = 1.0;
   pid_.Init(Kp_s, Ki_s, Kd_s);
   
   PID pid_throttle;
-  const double Kp_t = 0.6;
-  const double Ki_t = 0.0;
-  const double Kd_t = 3.0;
+  const double Kp_t = 0.2;
+  const double Ki_t = 0.001;
+  const double Kd_t = 2.0;
   pid_throttle.Init(Kp_t, Ki_t, Kd_t);
   h.onMessage([&pid_, &pid_throttle](uWS::WebSocket<uWS::SERVER> ws, char *data, size_t length, uWS::OpCode opCode) {
     // "42" at the start of the message means there's a websocket message event.
@@ -146,24 +146,24 @@ int main()
           double angle = std::stod(j[1]["steering_angle"].get<std::string>());
           double steer_value;
 		  double throttle_value;
-		  double speed_required = 40.0;
+		  double speed_required = 30.0;
           /*
           * TODO: Calcuate steering value here, remember the steering value is
           * [-1, 1].
           * NOTE: Feel free to play around with the throttle and speed. Maybe use
           * another PID controller to control the speed!
           */
-		    if ((speed > 50) & (throttle_value > 0.0)) {
-            pid_.Kp = 0.04;
-            pid_.Ki = 0.0012;
-            pid_.Kd = 0.8;
-          } else { // have to reset to defaults once car slows down
-            pid_.Kp = 0.035;
-            pid_.Ki = 0.0084;
-            //pid_.Ki = 0.00;
-            pid_.Kd = 1.16;
-          }
-          
+// 		    if ((speed > 50) & (throttle_value > 0.0)) {
+//             pid_.Kp = 0.04;
+//             pid_.Ki = 0.0012;
+//             pid_.Kd = 0.8;
+//           } else { // have to reset to defaults once car slows down
+//             pid_.Kp = 0.035;
+//             pid_.Ki = 0.0084;
+//             //pid_.Ki = 0.00;
+//             pid_.Kd = 1.16;
+//           }
+//           
           pid_.UpdateError(cte);
           
           // addressing issues with I
@@ -182,20 +182,29 @@ int main()
           if (steer_value < -1.0)
             steer_value = -1.0;          
           
+		  double throttle_error = speed - speed_required;
+		  pid_throttle.UpdateError(throttle_error);
+		  throttle_value = pid_throttle.TotalError();
+		  if (throttle_value > 0.3)
+			  throttle_value = 0.3;
+		  else if (throttle_value < -0.3)
+			  throttle_value = -0.3;
+		  
           // update throttle
-          pid_throttle.UpdateError(cte);
-          throttle_value = 1.0 - std::fabs(pid_throttle.TotalError());
-          double min_speed = 40;
-          double min_throttle = 0.3;
-          double max_breaking = -0.3;
-          if (throttle_value < min_throttle) { 
-            if (speed < min_speed)
-              throttle_value = min_throttle;
-            else {
-              if (throttle_value < max_breaking)
-                throttle_value = max_breaking;
-            }
-          }
+          //pid_throttle.UpdateError(abs(cte));
+          //throttle_value = 1.0 + (pid_throttle.TotalError());
+//           double min_speed = 40;
+//           double min_throttle = 0.3;
+//           double max_breaking = -0.3;
+		  
+//           if (throttle_value < min_throttle) { 
+//             if (speed < min_speed)
+//               throttle_value = min_throttle;
+//             else {
+//               if (throttle_value < max_breaking)
+//                 throttle_value = max_breaking;
+//             }
+//           }
           // DEBUG
 		  if (!twiddle_on){
 			std::cout << "CTE: " << cte << " Steering Value: " << steer_value << std::endl;
